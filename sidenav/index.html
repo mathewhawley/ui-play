@@ -10,8 +10,25 @@
 </head>
 <body>
   <header class="header" role="banner">
-    <button class="js-header__menu-button header__menu-button material-icons">menu</button>
+    <button class="js-sidenav-open header__sidenav-open material-icons">menu</button>
   </header>
-  <script src="script.js"></script>
+  <aside class="js-sidenav sidenav">
+    <div class="js-sidenav-panel sidenav__panel">
+      <header class="sidenav__header">
+        <button class="js-sidenav-close sidenav__close material-icons">close</button>
+        <h2>Sidenav</h2>
+      </header>
+      <nav class="sidenav__links">
+        <ul>
+          <li>One</li>
+          <li>Two</li>
+          <li>Three</li>
+          <li>Four</li>
+          <li>Five</li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+  <script src="sidenav.js"></script>
 </body>
 </html>

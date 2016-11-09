@@ -1,6 +1,12 @@
 :root {
+  --black: #000;
+  --white: #fff;
   --dark-grey: #333;
+  --mid-grey: #ccc;
 
-  --menu-button-size: 50px;
+  --button-size: 50px;
   --menu-height: 50px;
+
+  --sidenav-max-width: 350px;
+  --global-padding: 16px;
 }
