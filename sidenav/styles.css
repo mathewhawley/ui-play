@@ -1,0 +1,37 @@
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html,
+body {
+  background-color: #fafafa;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  align-items: center;
+  background-color: var(--dark-grey);
+  display: flex;
+  height: var(--menu-height);
+  width: 100%;
+}
+
+.header__menu-button {
+  background: none;
+  border: 0;
+  color: #fff;
+  height: var(--menu-button-size);
+  padding: 0;
+  width: var(--menu-button-size);
+}
+
+.header__menu-button:hover {
+  cursor: pointer;
+}
