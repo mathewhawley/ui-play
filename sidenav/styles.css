@@ -83,15 +83,15 @@ button:hover {
   top: 0;
 }
 
-.sidenav--active {
+.sidenav.active {
   pointer-events: auto;
 }
 
-.sidenav--active .sidenav__panel {
+.sidenav.active .sidenav__panel {
   transform: translateX(0);
 }
 
-.sidenav--active::before {
+.sidenav.active::before {
   opacity: 1;
 }
 
@@ -103,6 +103,9 @@ button:hover {
   position: relative;
   width: 90%;
   transform: translateX(-102%);
+}
+
+.sidenav__panel.animate {
   transition: transform 300ms ease;
 }
 

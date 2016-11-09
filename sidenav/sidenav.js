@@ -1,5 +1,10 @@
 class SideNav {
   constructor() {
+    this.states = {
+      active: 'active',
+      animate: 'animate',
+    };
+
     // Store element references
     this.sideNavOpenEl = document.querySelector('.js-sidenav-open');
     this.sideNavCloseEl = document.querySelector('.js-sidenav-close');
@@ -10,6 +15,7 @@ class SideNav {
     this.openSideNav = this.openSideNav.bind(this);
     this.closeSideNav = this.closeSideNav.bind(this);
     this.blockClicks = this.blockClicks.bind(this);
+    this.onTransitionEnd = this.onTransitionEnd.bind(this);
 
     // attach event listeners to elements
     this.addEventListeners();
@@ -23,11 +29,22 @@ class SideNav {
   }
 
   openSideNav() {
-    this.sideNavEl.classList.add('sidenav--active');
+    const { active, animate } = this.states;
+    this.sideNavEl.classList.add(active);
+    this.sideNavPanelEl.classList.add(animate);
+    this.sideNavPanelEl.addEventListener('transitionend', this.onTransitionEnd);
   }
 
   closeSideNav() {
-    this.sideNavEl.classList.remove('sidenav--active');
+    const { active, animate } = this.states;
+    this.sideNavEl.classList.remove(active);
+    this.sideNavPanelEl.classList.add(animate);
+    this.sideNavPanelEl.addEventListener('transitionend', this.onTransitionEnd);
+  }
+
+  onTransitionEnd() {
+    this.sideNavPanelEl.classList.remove(this.states.animate);
+    this.sideNavPanelEl.removeEventListener('transitionend', this.onTransitionEnd);
   }
 
   blockClicks(event) {
