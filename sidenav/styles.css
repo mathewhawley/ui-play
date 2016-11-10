@@ -105,8 +105,12 @@ button:hover {
   transform: translateX(-102%);
 }
 
-.sidenav__panel.animate {
+.sidenav.active .sidenav__panel.animate {
   transition: transform 300ms ease;
+}
+
+.sidenav__panel.animate {
+  transition: transform 150ms ease;
 }
 
 .sidenav__header {
