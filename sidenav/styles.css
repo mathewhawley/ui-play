@@ -73,6 +73,7 @@ button:hover {
   opacity: 0;
   position: absolute;
   transition: opacity 200ms ease;
+  will-change: opacity;
 }
 
 .sidenav,
@@ -103,14 +104,15 @@ button:hover {
   position: relative;
   width: 90%;
   transform: translateX(-102%);
+  will-change: transform;
 }
 
 .sidenav.active .sidenav__panel.animate {
-  transition: transform 300ms ease;
+  transition: transform 300ms ease-out;
 }
 
 .sidenav__panel.animate {
-  transition: transform 150ms ease;
+  transition: transform 150ms ease-in;
 }
 
 .sidenav__header {

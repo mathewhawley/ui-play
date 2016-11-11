@@ -21,7 +21,7 @@ class SideNav {
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
 
-    // Touch event coordinates
+    // Touch event position references
     this.startX = 0;
     this.currentX = 0;
 
@@ -61,7 +61,7 @@ class SideNav {
     this.sideNavPanelEl.removeEventListener('transitionend', this.onTransitionEnd);
   }
 
-  onTouchStart(event) {
+  onTouchStart() {
     if (!this.sideNavEl.classList.contains(this.states.active)) {
       return;
     }
