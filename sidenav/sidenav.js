@@ -45,15 +45,15 @@ class SideNav {
   openSideNav() {
     const { active, animate } = this.states;
     this.sideNavPanelEl.addEventListener('transitionend', this.onTransitionEnd);
-    this.sideNavEl.classList.add(active);
     this.sideNavPanelEl.classList.add(animate);
+    this.sideNavEl.classList.add(active);
   }
 
   closeSideNav() {
     const { active, animate } = this.states;
     this.sideNavPanelEl.addEventListener('transitionend', this.onTransitionEnd);
-    this.sideNavEl.classList.remove(active);
     this.sideNavPanelEl.classList.add(animate);
+    this.sideNavEl.classList.remove(active);
   }
 
   onTransitionEnd() {
@@ -74,9 +74,11 @@ class SideNav {
     if (!this.sideNavEl.classList.contains(this.states.active)) {
       return;
     }
-    this.currentX = event.touches[0].pageX;
-    const translateX = Math.min(0, this.currentX - this.startX);
-    this.sideNavPanelEl.style.transform = `translateX(${translateX}px)`;
+    window.requestAnimationFrame(() => {
+      this.currentX = event.touches[0].pageX;
+      const translateX = Math.min(0, this.currentX - this.startX);
+      this.sideNavPanelEl.style.transform = `translateX(${translateX}px)`;
+    });
   }
 
   onTouchEnd() {
