@@ -1,11 +1,15 @@
-.swipeable-card-list {
+body {
+  overflow: hidden;
+}
+
+.swipeable-cards {
   margin: 0 auto;
   max-width: 350px;
   padding: 16px;
   width: 100%;
 }
 
-.swipeable-card-container:not(:first-child) {
+.swipeable-card:not(:first-child) {
   margin-top: 16px;
 }
 
@@ -17,4 +21,8 @@
   height: 150px;
   justify-content: center;
   width: 100%;
+}
+
+.swipeable-card:hover {
+  cursor: pointer;
 }
