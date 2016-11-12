@@ -8,12 +8,14 @@ class SwipeableCards {
     this.onStart = this.onStart.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
-    this.ancestorWithClass = this.ancestorWithClass.bind(this);
     this.update = this.update.bind(this);
+    this.onTransitionEnd = this.onTransitionEnd.bind(this);
 
     // Store coordinates
     this.startX = 0;
     this.currentX = 0;
+
+    this.isDragging = false;
 
     // Current card
     this.target = null;
@@ -23,36 +25,37 @@ class SwipeableCards {
   }
 
   addEventListeners() {
-    Array.from(this.swipeableCardsEl).forEach((el) => {
-      document.addEventListener('touchstart', this.onStart, false);
-      document.addEventListener('touchmove', this.onMove, false);
-      document.addEventListener('touchend', this.onEnd, false);
-      document.addEventListener('mousedown', this.onStart, false);
-      document.addEventListener('mousemove', this.onMove, false);
-      document.addEventListener('mouseup', this.onEnd, false);
-    });
+    document.addEventListener('touchstart', this.onStart, false);
+    document.addEventListener('touchmove', this.onMove, false);
+    document.addEventListener('touchend', this.onEnd, false);
+    document.addEventListener('mousedown', this.onStart, false);
+    document.addEventListener('mousemove', this.onMove, false);
+    document.addEventListener('mouseup', this.onEnd, false);
   }
 
   onStart(event) {
     event.preventDefault();
 
     // Get card element if it exists in selected DOM branch
-    const cardEl = this.ancestorWithClass(event.target, 'js-swipeable-card');
+    const cardEl = ancestorWithClass(event.target, 'js-swipeable-card');
 
     // If selected element is not a 'card', exit early
     // otherwise store a reference to the card element
     if (!cardEl) {
+      console.log('not card');
       return;
     } else {
       this.target = cardEl;
     }
-
+    console.log('card');
     // Promote target to layer on GPU
     this.target.style.willChange = 'transform';
     // Store a reference to start location
     this.startX = event.pageX || event.touches[0].pageX;
     // Update current position
     this.currentX = this.startX;
+
+    this.isDragging = true;
 
     // Schedule future updates via browser
     window.requestAnimationFrame(this.update);
@@ -64,8 +67,9 @@ class SwipeableCards {
     if (!this.target) {
       return;
     }
+
     // Update current position reference
-    this.currentX = event.pageX || event.touches[0].pageX;
+    this.currentX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
   }
 
   onEnd(event) {
@@ -74,26 +78,34 @@ class SwipeableCards {
     if (!this.target) {
       return;
     }
-    // Remove GPU layer
+
+    // No longer dragging the card
+    this.isDragging = false;
+
+    // Initiate transition – either back to start or off screen
+    this.target.addEventListener('transitionend', this.onTransitionEnd);
+    this.target.classList.add('animate');
+    this.target.style.transform = 'translateX(0)';
+  }
+
+  onTransitionEnd() {
+    // Remove dynamically added styles
     this.target.style.willChange = '';
+    this.target.style.transform = '';
+    // Remove transition properties
+    this.target.classList.remove('animate');
+    // Remove event listener
+    this.target.removeEventListener('transitionend', this.onTransitionEnd);
     // Reset target reference
     this.target = null;
   }
 
-  ancestorWithClass(element, ancestorClass) {
-    // If the current element has the specified class, return the element
-    if (element.className && element.className.split(' ').includes(ancestorClass)) {
-      return element;
-    }
-    // Check ancestor nodes until no more
-    return element.parentNode && this.ancestorWithClass(element.parentNode, ancestorClass);
-  }
-
   update() {
+    console.log('animating');
     // Continue animation loop
     const requestId = window.requestAnimationFrame(this.update);
-    // If we no longer have a target, stop animation, early exit
-    if (!this.target) {
+    // If the card isn't being dragged, stop animation loop
+    if (!this.isDragging) {
       window.cancelAnimationFrame(requestId);
       return;
     }
