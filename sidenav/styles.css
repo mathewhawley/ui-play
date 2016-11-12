@@ -1,40 +1,15 @@
 /*
- * Resets
+ * Base
  * ========================================== */
 
 html {
-  box-sizing: border-box;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: var(--dark-grey);
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
-}
 
 html,
 body {
-  background-color: #fafafa;
-  margin: 0;
-  padding: 0;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-button {
-  background: none;
-  padding: 0;
-  border: 0;
-}
-
-button:hover {
-  cursor: pointer;
+  background-color: var(--off-white);
 }
 
 /*
