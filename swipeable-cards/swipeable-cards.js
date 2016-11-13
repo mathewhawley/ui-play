@@ -1,34 +1,32 @@
 class SwipeableCards {
   constructor() {
-    // Store references to elements
-    this.swipeableCardsEl = Array.from(
-      document.querySelectorAll('.js-swipeable-cards .js-swipeable-card')
-    );
+    this.cards =
+      Array.from(document.querySelectorAll('.js-swipeable-cards .js-swipeable-card'));
+
+    // Selected card
+    this.target = null;
+    // Layout information of a card
+    this.targetBCR = null;
+
+    // Initialise positions
+    this.startX = 0;
+    this.currentX = 0;
+
+    // How far we need to 'drag' a card to dismiss,
+    // as a percentage of the card width
+    this.dismissTolerance = 0.35;
+    this.shouldDismiss = false;
+
+    // Initial 'interactivity' state
+    this.active = false;
 
     // Bind methods to instance
     this.onStart = this.onStart.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
-    this.update = this.update.bind(this);
-    this.onTransitionEnd = this.onTransitionEnd.bind(this);
-    this.onAnimationEnd = this.onAnimationEnd.bind(this);
-    this.animateCardsIntoPlace = this.animateCardsIntoPlace.bind(this);
+    this.repositionCards = this.repositionCards.bind(this);
 
-    // Store coordinates
-    this.startX = 0;
-    this.currentX = 0;
-
-    // Determine if a card is being dragged
-    this.dragging = false;
-    // How far you need to drag before a card is dismissed
-    // (percentage of card width)
-    this.dragTolerance = 0.35;
-
-    // Current card
-    this.target = null;
-    this.targetBCR = null;
-
-    // Register event listeners
+    // Register event handlers
     this.addEventListeners();
   }
 
@@ -36,148 +34,150 @@ class SwipeableCards {
     document.addEventListener('touchstart', this.onStart, false);
     document.addEventListener('touchmove', this.onMove, false);
     document.addEventListener('touchend', this.onEnd, false);
-    document.addEventListener('mousedown', this.onStart, false);
-    document.addEventListener('mousemove', this.onMove, false);
-    document.addEventListener('mouseup', this.onEnd, false);
+    // document.addEventListener('mousedown', this.onStart, false);
+    // document.addEventListener('mousemove', this.onMove, false);
+    // document.addEventListener('mouseup', this.onEnd, false);
   }
 
   onStart(event) {
+    console.log('*********************')
     event.preventDefault();
 
-    // Disable interactions while current card transitions are in play
-    if (this.target) {
+    // Disable interaction while a card transition is in progress
+    if (this.active) {
+      console.log('start: active');
       return;
     }
 
-    // Get card element if it exists in selected DOM branch
-    const cardEl = ancestorWithClass(event.target, 'js-swipeable-card');
+    console.log('start: inactive');
 
-    // If selected element is not a 'card', exit early
-    // otherwise store a reference to the card element
-    if (!cardEl) {
+    // Determine if we have clicked on a 'card'
+    this.target = ancestorWithClass(event.target, 'js-swipeable-card');
+
+    // If a card hasn't been selected, exit early
+    if (!this.target) {
+      console.log('start: no card');
       return;
-    } else {
-      this.target = cardEl;
     }
+    console.log('start: card');
 
-    // Get size/position values of card
+    // Set card 'state' to active
+    this.active = true;
+
+    // Store target layout information
     this.targetBCR = this.target.getBoundingClientRect();
-    // Promote target to layer on GPU
+    // Promote to GPU layer
     this.target.style.willChange = 'transform';
-    // Store a reference to start location
-    this.startX = event.pageX || event.touches[0].pageX;
-    // Update current position
-    this.currentX = this.startX;
-    // We are dragging
-    this.dragging = true;
 
-    // Schedule future updates via browser
-    window.requestAnimationFrame(this.update);
+    // Set start position
+    this.startX = event.pageX || event.touches[0].pageX;
+    // Initialise 'current' position
+    this.currentX = this.startX;
   }
 
   onMove(event) {
-    // If we don't have a target element, early exit
-    if (!this.target) {
+    event.preventDefault();
+    // If the card 'state' is inactive, exit early
+    if (!this.active) {
+      console.log('move: inactive');
       return;
     }
-    // Update current position reference
-    this.currentX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
+
+    console.log('move: active');
+
+    // Update current position value
+    this.currentX = event.pageX || event.touches[0].pageX;
+    // Calculate how far we have moved from the start position
+    const translateX = (this.currentX - this.startX) / 2;
+
+    // Schedule transforms via the browser
+    window.requestAnimationFrame(() => {
+      this.target.style.transform = `translateX(${translateX}px)`;
+    });
   }
 
   onEnd(event) {
-    // If we don't have a target element, early exit
-    if (!this.target) {
+    // If the card 'state' is inactive, exit early
+    if (!this.active) {
+      console.log('end: inactive');
       return;
     }
 
-    // No longer dragging the card
-    this.dragging = false;
-    // Add event listener for future transitions
-    this.target.addEventListener('transitionend', this.onTransitionEnd);
-    // Add class to allow CSS controlled transition
+    // Store values for determining final behaviour
+    const cardWidth = this.targetBCR.width;
+    const translateX = this.currentX - this.startX;
+    let translateTarget = 0;
+
+    const onTransitionEnd = () => {
+      console.log('transitionend');
+      // Remove transition event listener
+      this.target.removeEventListener('transitionend', onTransitionEnd);
+      // Remove CSS transition behaviour
+      this.target.classList.remove('animate');
+      // Demote from GPU layer
+      this.target.style.willChange = 'initial';
+
+      if (this.shouldDismiss) {
+        console.log('dismiss confirm');
+        // Remove card from DOM
+        this.target.parentNode.removeChild(this.target);
+        // Remove node from nodelist
+        const targetIndex = this.cards.indexOf(this.target);
+        this.cards.splice(targetIndex, 1);
+
+        // Animate the rest of the cards into new position
+        this.repositionCards(targetIndex);
+
+        return;
+      }
+
+      this.active = false;
+    };
+
+    this.target.addEventListener('transitionend', onTransitionEnd);
     this.target.classList.add('animate');
 
-    let translateTarget = 0;
-    const translateX = this.currentX - this.startX;
-
-    if (Math.abs(translateX) > this.targetBCR.width * this.dragTolerance) {
-      translateTarget = translateX > 0
-        ? this.targetBCR.width
-        : this.targetBCR.width * -1;
-
-      // Fade out
-      this.target.classList.add('fade-out');
+    // If we have dragged far enough to dismiss, send card
+    // to left or right and fade out
+    if (Math.abs(translateX) > (cardWidth * this.dismissTolerance)) {
+      translateTarget = translateX > 0 ? cardWidth : cardWidth * -1;
+      this.target.style.opacity = 0;
+      this.shouldDismiss = true;
     }
+    // console.log('should dismiss:', this.shouldDismiss);
+    console.log(translateTarget);
+    // Set final position of card
+    this.target.style.transform = `translateX(${translateTarget}px)`;
 
-    // Move card in to place
-    this.target.style.transform = `translate(${translateTarget}px, 0)`;
-    // Remove from GPU
-    this.target.style.willChange = 'initial';
-
-    this.resetTarget = true;
+    console.log('end:', this.active);
   }
 
-  onTransitionEnd() {
-    // Remove transition properties
-    this.target.classList.remove('animate');
-    // Remove event listener
-    this.target.removeEventListener('transitionend', this.onTransitionEnd);
+  repositionCards(startIndex) {
+    const cardCount = this.cards.length;
 
-    if (this.target.classList.contains('fade-out')) {
-      // Remove card from DOM
-      this.target.parentNode.removeChild(this.target);
-      const startIndex = this.swipeableCardsEl.indexOf(this.target);
-      // Remove card from nodelist
-      this.swipeableCardsEl.splice(startIndex, 1);
-      this.animateCardsIntoPlace(startIndex);
-      return;
+    const onTransitionEnd = event => {
+      event.target.removeEventListener('transitionend', onTransitionEnd);
+      event.target.style.transition = 'none';
+      event.target.style.transform = 'none';
+      // Set state to inactive – allow new interactions
+      this.active = false;
+      this.shouldDismiss = false;
+    };
+
+    for (let i = startIndex; i < cardCount; i++) {
+      const card = this.cards[i];
+      console.log(card);
+      card.style.transform = `translateY(${this.targetBCR.height + 16}px)`;
+      card.addEventListener('transitionend', onTransitionEnd);
     }
 
-    this.target = null;
-  }
-
-  onAnimationEnd(event) {
-    this.target = null;
-    event.target.style.transition = '';
-    event.target.removeEventListener('transitionend', this.onAnimationEnd);
-  }
-
-  animateCardsIntoPlace(startIndex) {
-    // If card is the last one left, reset target
-    if (startIndex === this.swipeableCardsEl.length) {
-      this.target = null;
-      return;
-    }
-
-    // Add transition styles to following cards
-    for (let i = startIndex; i < this.swipeableCardsEl.length; i++) {
-      const card = this.swipeableCardsEl[i];
-      card.style.transform = `translate(0, ${this.targetBCR.height + 16}px)`;
-      card.addEventListener('transitionend', this.onAnimationEnd);
-    }
-
-    // Animate cards up
     setTimeout(() => {
-      for (let i = startIndex; i < this.swipeableCardsEl.length; i++) {
-        const card = this.swipeableCardsEl[i];
-        card.style.transition = `transform 150ms cubic-bezier(0,0,0.31,1) ${i*50}ms`;
-        card.style.transform = '';
+      for (let i = startIndex; i < cardCount; i++) {
+        const card = this.cards[i];
+        card.style.transition = `transform 300ms ease ${i * 50}ms`;
+        card.style.transform = 'none';
       }
     }, 0);
-  }
-
-  update() {
-    // Continue animation loop
-    const requestId = window.requestAnimationFrame(this.update);
-    // If the card isn't being dragged, stop animation loop
-    if (!this.dragging) {
-      window.cancelAnimationFrame(requestId);
-      return;
-    }
-    // Calculate new position of element
-    const translateX = (this.currentX - this.startX) / 2;
-    // Apply updates to the DOM
-    this.target.style.transform = `translate(${translateX}px, 0)`;
   }
 }
 
