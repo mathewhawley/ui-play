@@ -1,8 +1,9 @@
 class SwipeableCards {
   constructor() {
     // Store references to elements
-    this.swipeableCardsEl =
-      document.querySelectorAll('.js-swipeable-cards .js-swipeable-card');
+    this.swipeableCardsEl = Array.from(
+      document.querySelectorAll('.js-swipeable-cards .js-swipeable-card')
+    );
 
     // Bind methods to instance
     this.onStart = this.onStart.bind(this);
@@ -10,6 +11,8 @@ class SwipeableCards {
     this.onEnd = this.onEnd.bind(this);
     this.update = this.update.bind(this);
     this.onTransitionEnd = this.onTransitionEnd.bind(this);
+    this.onAnimationEnd = this.onAnimationEnd.bind(this);
+    this.animateCardsIntoPlace = this.animateCardsIntoPlace.bind(this);
 
     // Store coordinates
     this.startX = 0;
@@ -40,6 +43,12 @@ class SwipeableCards {
 
   onStart(event) {
     event.preventDefault();
+
+    // Disable interactions while current card transitions are in play
+    if (this.target) {
+      return;
+    }
+
     // Get card element if it exists in selected DOM branch
     const cardEl = ancestorWithClass(event.target, 'js-swipeable-card');
 
@@ -73,7 +82,6 @@ class SwipeableCards {
     }
     // Update current position reference
     this.currentX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
-    event.preventDefault();
   }
 
   onEnd(event) {
@@ -102,10 +110,11 @@ class SwipeableCards {
     }
 
     // Move card in to place
-    this.target.style.transform = `translateX(${translateTarget}px)`;
+    this.target.style.transform = `translate(${translateTarget}px, 0)`;
     // Remove from GPU
     this.target.style.willChange = 'initial';
-    event.preventDefault();
+
+    this.resetTarget = true;
   }
 
   onTransitionEnd() {
@@ -113,8 +122,48 @@ class SwipeableCards {
     this.target.classList.remove('animate');
     // Remove event listener
     this.target.removeEventListener('transitionend', this.onTransitionEnd);
-    // Reset target reference
+
+    if (this.target.classList.contains('fade-out')) {
+      // Remove card from DOM
+      this.target.parentNode.removeChild(this.target);
+      const startIndex = this.swipeableCardsEl.indexOf(this.target);
+      // Remove card from nodelist
+      this.swipeableCardsEl.splice(startIndex, 1);
+      this.animateCardsIntoPlace(startIndex);
+      return;
+    }
+
     this.target = null;
+  }
+
+  onAnimationEnd(event) {
+    this.target = null;
+    event.target.style.transition = '';
+    event.target.removeEventListener('transitionend', this.onAnimationEnd);
+  }
+
+  animateCardsIntoPlace(startIndex) {
+    // If card is the last one left, reset target
+    if (startIndex === this.swipeableCardsEl.length) {
+      this.target = null;
+      return;
+    }
+
+    // Add transition styles to following cards
+    for (let i = startIndex; i < this.swipeableCardsEl.length; i++) {
+      const card = this.swipeableCardsEl[i];
+      card.style.transform = `translate(0, ${this.targetBCR.height + 16}px)`;
+      card.addEventListener('transitionend', this.onAnimationEnd);
+    }
+
+    // Animate cards up
+    setTimeout(() => {
+      for (let i = startIndex; i < this.swipeableCardsEl.length; i++) {
+        const card = this.swipeableCardsEl[i];
+        card.style.transition = `transform 150ms cubic-bezier(0,0,0.31,1) ${i*50}ms`;
+        card.style.transform = '';
+      }
+    }, 0);
   }
 
   update() {
@@ -128,7 +177,7 @@ class SwipeableCards {
     // Calculate new position of element
     const translateX = (this.currentX - this.startX) / 2;
     // Apply updates to the DOM
-    this.target.style.transform = `translateX(${translateX}px)`;
+    this.target.style.transform = `translate(${translateX}px, 0)`;
   }
 }
 
