@@ -32,7 +32,7 @@ class SwipeableCards {
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
     this.repositionCards = this.repositionCards.bind(this);
-    this.resetTarget = this.resetTarget.bind(this);
+    this.reset = this.reset.bind(this);
     this.cardDismissTransitionEnd = this.cardDismissTransitionEnd.bind(this);
     this.cardSlideUpTransitionEnd = this.cardSlideUpTransitionEnd.bind(this);
     this.update = this.update.bind(this);
@@ -111,7 +111,7 @@ class SwipeableCards {
 
     // If a card has only been 'clicked' or 'tapped', reset and exit
     if (!this.moved) {
-      this.resetTarget();
+      this.reset();
       return;
     }
 
@@ -140,7 +140,7 @@ class SwipeableCards {
 
     // If the card is the last one, reset and exit
     if (cardCount === startIndex) {
-      this.resetTarget();
+      this.reset();
       return;
     }
 
@@ -181,7 +181,7 @@ class SwipeableCards {
     }
 
     // Reset
-    this.resetTarget();
+    this.reset();
   }
 
   cardSlideUpTransitionEnd(event) {
@@ -191,7 +191,7 @@ class SwipeableCards {
     event.target.style.transform = '';
     event.target.style.transition = '';
     // Reset
-    this.resetTarget();
+    this.reset();
   }
 
   update() {
@@ -206,11 +206,12 @@ class SwipeableCards {
     this.target.style.transform = `translateX(${this.translateX}px)`;
   }
 
-  resetTarget() {
+  reset() {
     this.active = false;
     this.shouldDismiss = false;
     this.moved = false;
     this.target.style.willChange = '';
+    this.translateX = 0;
   }
 }
 
