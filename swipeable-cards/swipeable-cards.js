@@ -12,6 +12,7 @@ class SwipeableCards {
     // Initialise positions
     this.startX = 0;
     this.currentX = 0;
+    this.translateX = 0;
 
     // How far we need to 'drag' a card to dismiss,
     // as a percentage of the card width
@@ -22,6 +23,10 @@ class SwipeableCards {
     this.active = false;
     this.moved = false;
 
+    // requestAnimationFrame id
+    this.requestId = 0;
+    this.runAnimation = false;
+
     // Bind methods to instance
     this.onStart = this.onStart.bind(this);
     this.onMove = this.onMove.bind(this);
@@ -30,6 +35,7 @@ class SwipeableCards {
     this.resetTarget = this.resetTarget.bind(this);
     this.cardDismissTransitionEnd = this.cardDismissTransitionEnd.bind(this);
     this.cardSlideUpTransitionEnd = this.cardSlideUpTransitionEnd.bind(this);
+    this.update = this.update.bind(this);
 
     // Register event handlers
     this.addEventListeners();
@@ -71,6 +77,9 @@ class SwipeableCards {
     this.startX = event.pageX || event.touches[0].pageX;
     // Initialise 'current' position
     this.currentX = this.startX;
+    // Start animation
+    this.runAnimation = true;
+    this.requestId = window.requestAnimationFrame(this.update);
   }
 
   onMove(event) {
@@ -86,16 +95,14 @@ class SwipeableCards {
     // Update current position value
     this.currentX = event.pageX || event.touches[0].pageX;
     // Calculate how far we have moved from the start position
-    const translateX = (this.currentX - this.startX) / 2;
-
-    // Schedule transforms via the browser
-    window.requestAnimationFrame(() => {
-      this.target.style.transform = `translateX(${translateX}px)`;
-    });
+    this.translateX = (this.currentX - this.startX) / 2;
   }
 
   onEnd(event) {
     event.preventDefault();
+
+    // Signal to stop animation loop
+    this.runAnimation = false;
 
     // If the card 'state' is inactive, exit early
     if (!this.active) {
@@ -137,13 +144,15 @@ class SwipeableCards {
       return;
     }
 
+    // Reposition cards following dismissed target
     for (let i = startIndex; i < cardCount; i++) {
       const card = this.cards[i];
       card.addEventListener('transitionend', this.cardSlideUpTransitionEnd);
       card.style.transform = `translateY(${this.targetHeight + 16}px)`;
     }
 
-    setTimeout(() => {
+    // Apply transitions on next available tick
+    window.setTimeout(() => {
       for (let i = startIndex; i < cardCount; i++) {
         const card = this.cards[i];
         card.style.transition = `transform 200ms ease ${i * 50}ms`;
@@ -157,6 +166,8 @@ class SwipeableCards {
     this.target.removeEventListener('transitionend', this.cardDismissTransitionEnd);
     // Remove CSS transition behaviour
     this.target.classList.remove('animate');
+    // Reset distanced travelled
+    this.translateX = 0;
 
     if (this.shouldDismiss) {
       // Remove card from DOM
@@ -181,6 +192,18 @@ class SwipeableCards {
     event.target.style.transition = '';
     // Reset
     this.resetTarget();
+  }
+
+  update() {
+    // Create animation loop
+    this.requestId = window.requestAnimationFrame(this.update);
+    // Stop if user no longer interacting with a card
+    if (!this.runAnimation) {
+      window.cancelAnimationFrame(this.requestId);
+      return;
+    }
+    // Update position of target
+    this.target.style.transform = `translateX(${this.translateX}px)`;
   }
 
   resetTarget() {
