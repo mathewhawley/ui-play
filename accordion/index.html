@@ -30,8 +30,11 @@
   </div>
 
   <script>
-    const accordion = document.querySelector('.js-accordion');
-    if (accordion) accordion.setAttribute('enhanced', true);
+    Array
+      .from(document.querySelectorAll('.js-accordion'))
+      .forEach(element => {
+        if (element) element.setAttribute('enhanced', true);
+      });
   </script>
   <script src="accordion.js"></script>
 </body>
