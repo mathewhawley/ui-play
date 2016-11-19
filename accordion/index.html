@@ -11,26 +11,27 @@
 <body>
   <div role="tablist" class="js-accordion accordion">
 
-    <div id="tab-1" role="tab" class="accordion__tab" aria-controls="tabpanel-1" aria-expanded="true" aria-selected="true" tabindex="0">Panel 1</div>
-    <div id="tabpanel-1" role="tabpanel" class="accordion__tabpanel" aria-labelledby="tab-1" aria-hidden="false">
+    <div id="tab-1" role="tab" class="js-accordion__tab accordion__tab" aria-controls="tabpanel-1" aria-expanded="true" aria-selected="true" tabindex="0">Panel 1</div>
+    <div id="tabpanel-1" role="tabpanel" class="js-accordion__tabpanel accordion__tabpanel" aria-labelledby="tab-1" aria-hidden="false">
       <p>Etiam porta sem malesuada magna mollis euismod. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
     </div>
 
-    <div id="tab-2" role="tab" class="accordion__tab" aria-controls="tabpanel-2" aria-expanded="false" aria-selected="false" tabindex="0">Panel 2</div>
-    <div id="tabpanel-2" role="tabpanel" class="accordion__tabpanel" aria-labelledby="tab-2" aria-hidden="true">
+    <div id="tab-2" role="tab" class="js-accordion__tab accordion__tab" aria-controls="tabpanel-2" aria-expanded="false" aria-selected="false" tabindex="0">Panel 2</div>
+    <div id="tabpanel-2" role="tabpanel" class="js-accordion__tabpanel accordion__tabpanel" aria-labelledby="tab-2" aria-hidden="true">
       <p>Maecenas sed diam eget risus varius blandit sit amet non magna. Aenean lacinia bibendum nulla sed consectetur. Maecenas sed diam eget risus varius blandit sit amet non magna. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Nulla vitae elit libero, a pharetra augue. Maecenas faucibus mollis interdum.</p>
       <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla. Aenean lacinia bibendum nulla sed consectetur. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
     </div>
 
-    <div id="tab-3" role="tab" class="accordion__tab" aria-controls="tabpanel-3" aria-expanded="false" aria-selected="false" tabindex="0">Panel 3</div>
-    <div id="tabpanel-3" role="tabpanel" class="accordion__tabpanel" aria-labelledby="tab-3" aria-hidden="true">
+    <div id="tab-3" role="tab" class="js-accordion__tab accordion__tab" aria-controls="tabpanel-3" aria-expanded="false" aria-selected="false" tabindex="0">Panel 3</div>
+    <div id="tabpanel-3" role="tabpanel" class="js-accordion__tabpanel accordion__tabpanel" aria-labelledby="tab-3" aria-hidden="true">
       <p>Donec ullamcorper nulla non metus auctor fringilla. Sed posuere consectetur est at lobortis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
     </div>
 
   </div>
 
   <script>
-    document.querySelector('.js-accordion').setAttribute('enhanced', true);
+    const accordion = document.querySelector('.js-accordion');
+    if (accordion) accordion.setAttribute('enhanced', true);
   </script>
   <script src="accordion.js"></script>
 </body>
